@@ -28,14 +28,32 @@ export class InvalidEmail extends CustomError{
   }
 }
 
+export class RegisteredUser extends CustomError{ 
+  constructor(){
+      super(409, "Email Já cadastrado")
+  }
+}
+
 export class InvalidPassword extends CustomError{ 
   constructor(){
       super(400, "Senha inválida")
   }
 }
 
-export class NotAuthorized extends CustomError{ 
+export class InvalidCredentials extends CustomError{ 
   constructor(){
-      super(401, "Usuário não autorizado")
+      super(400, "Email ou senha invalidas")
+  }
+}
+
+export class Unauthorized extends CustomError{ 
+  constructor(){
+      super(401, "Usuário não autorizado, por favor faça login novamente.")
+  }
+}
+
+export class UserNotFound extends CustomError{ 
+  constructor(){
+      super(404, "Usuário não encontrado")
   }
 }

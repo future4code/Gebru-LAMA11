@@ -1,46 +1,62 @@
 import { Request, Response } from "express";
-import { UserInputDTO, LoginInputDTO} from "../model/User";
 import { UserBusiness } from "../business/UserBusiness";
-import { CustomError } from "../error/BaseError";
 
 export class UserController {
-    async signup(req: Request, res: Response) {
-        try {
+   constructor(
+      private userBusiness: UserBusiness
+   ){}
 
-            const input: UserInputDTO = {
-                email: req.body.email,
-                name: req.body.name,
-                password: req.body.password,
-                role: req.body.role
-            }
+   public async signup(req: Request, res: Response) {
+      try {
+         const { name, role, email, password } = req.body
+         const result = await this.userBusiness.signup(
+            name,
+            email,
+            password,
+            role
+         );
+         res.status(200).send(result);
+      } catch (error:any) {
+         const { statusCode, message } = error
+         res.status(statusCode || 400).send({ message });
+      }
+   }
 
-            const userBusiness = new UserBusiness();
-            const token = await userBusiness.createUser(input);
+   public async login(req: Request, res: Response) {
+      try {
+         const { email, password } = req.body
+         const result = await this.userBusiness.login(email, password);
+         res.status(200).send(result);
+      } catch (error:any) {
+         const { statusCode, message } = error
+         res.status(statusCode || 400).send({ message });
+      }
+   }
 
-            res.status(200).send({ token });
+   public async getUserById(req: Request, res: Response) {
+      try {
+        const token = req.headers.authorization as string;
+        const { id } = req.params
 
-        } catch (error: any) {
-            throw new CustomError(400, "Descrever erro");
-          }
-    }
+        const user = await this.userBusiness.getUserById(id, token);
 
-    async login(req: Request, res: Response) {
+        res.status(200).send(user)
+      } catch (error: any) {
+        const { statusCode, message } = error
+        res.status(statusCode || 400).send({ message });
+      }
+   }
+   public async getUserByEmail(req: Request, res: Response) {
+      try {
+        const token = req.headers.authorization as string;
+        const { email } = req.params
 
-        try {
+        const user = await this.userBusiness.getUserByEmail(email, token);
 
-            const loginData: LoginInputDTO = {
-                email: req.body.email,
-                password: req.body.password
-            };
-
-            const userBusiness = new UserBusiness();
-            const token = await userBusiness.getUserByEmail(loginData);
-
-            res.status(200).send({ token });
-
-        } catch (error: any) {
-            throw new CustomError(400, "Descrever erro");
-          }
-    }
-
+        res.status(200).send(user)
+      } catch (error: any) {
+        const { statusCode, message } = error
+        res.status(statusCode || 400).send({ message });
+      }
+   }
 }

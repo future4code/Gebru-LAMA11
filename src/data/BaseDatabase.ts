@@ -1,12 +1,12 @@
-import knex from 'knex'
-import dotenv from 'dotenv'
+import dotenv from "dotenv";
+import knex from "knex";
 
-dotenv.config()
+dotenv.config();
 
-export class BaseDatabase {
+export default class BaseDataBase {
 
    protected static connection = knex({
-      client: 'mysql',
+      client: "mysql",
       connection: {
          host: process.env.DB_HOST,
          user: process.env.DB_USER,
@@ -14,7 +14,10 @@ export class BaseDatabase {
          database: process.env.DB_SCHEMA,
          port: 3306,
          multipleStatements: true
-      }
-   })
+      },
+   });
 
+   public static async destroyConnection(): Promise<void> {
+      await BaseDataBase.connection.destroy();
+   }
 }

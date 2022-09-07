@@ -1,43 +1,156 @@
-import { UserInputDTO, LoginInputDTO } from "../model/User";
-import { UserDatabase } from "../data/UserDatabase";
-import { IdGenerator } from "../services/IdGenerator";
-import { HashManager } from "../services/HashManager";
-import { Authenticator } from "../services/Authenticator";
+import { 
+    CustomError, 
+    InvalidCredentials, 
+    InvalidEmail, 
+    InvalidPassword, 
+    MissingParameters, 
+    RegisteredUser, 
+    Unauthorized, 
+    UserNotFound 
+} from "../error/CustomError";
+import { User } from "../model/User";
+import { IHashGenerator, IIDGenerator, ITokenGenerator } from "./Ports";
+import { UserRepository } from "./UserRepository";
 
 export class UserBusiness {
+   constructor(
+      private userDatabase: UserRepository,
+      private hashGenerator: IHashGenerator,
+      private idGenerator: IIDGenerator,
+      private tokenGenerator: ITokenGenerator
+   ){}
 
-    async createUser(user: UserInputDTO) {
+   public async signup(
+      name: string,
+      email: string,
+      password: string,
+      role: string
+   ) {
+      try {
+         if (!name || !email || !password) {
+            throw new MissingParameters();
+         }
 
-        const idGenerator = new IdGenerator();
-        const id = idGenerator.generate();
+         const checkEmail = (email: string) => {
+            let regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+            return regex.test(email);
+         };
 
-        const hashManager = new HashManager();
-        const hashPassword = await hashManager.hash(user.password);
+         if (!checkEmail(email)) {
+            throw new InvalidEmail();
+         }
 
-        const userDatabase = new UserDatabase();
-        await userDatabase.createUser(id, user.email, user.name, hashPassword, user.role);
+         const userExist = await this.userDatabase.getUserByEmail(email)
 
-        const authenticator = new Authenticator();
-        const accessToken = authenticator.generateToken({ id, role: user.role });
+         if (userExist) {
+           throw new RegisteredUser()
+         }
 
-        return accessToken;
-    }
+         if (password.length < 6) {
+            throw new InvalidPassword();
+         }
 
-    async getUserByEmail(user: LoginInputDTO) {
+         if(role !== "NORMAL" && role !== "ADMIN"){
+            role = "NORMAL"
+         }
 
-        const userDatabase = new UserDatabase();
-        const userFromDB = await userDatabase.getUserByEmail(user.email);
+         const id = this.idGenerator.generate();
 
-        const hashManager = new HashManager();
-        const hashCompare = await hashManager.compare(user.password, userFromDB.getPassword());
+         const cypherPassword = await this.hashGenerator.hash(password);
 
-        const authenticator = new Authenticator();
-        const accessToken = authenticator.generateToken({ id: userFromDB.getId(), role: userFromDB.getRole() });
+         await this.userDatabase.createUser(
+            new User(id, name, email, cypherPassword, User.stringToUserRole(role))
+         );
 
-        if (!hashCompare) {
-            throw new Error("Invalid Password!");
+         const accessToken = this.tokenGenerator.generate({
+            id,
+            role,
+         });
+
+         return { accessToken };
+
+      } catch (error:any) {
+         throw new CustomError(error.statusCode, error.message)
+      }
+   }
+
+   public async login(email: string, password: string) {
+      try {
+         if (!email || !password) {
+            throw new MissingParameters();
+         }
+
+         const user = await this.userDatabase.getUserByEmail(email);
+
+         if (!user) {
+            throw new InvalidCredentials();
+         }
+
+         const isPasswordCorrect = await this.hashGenerator.compareHash(
+            password,
+            user.getPassword()
+         );
+
+         if (!isPasswordCorrect) {
+            throw new InvalidCredentials();
+         }
+
+         const accessToken = this.tokenGenerator.generate({
+            id: user.getId(),
+            role: user.getRole(),
+         });
+
+         return { accessToken };
+      } catch (error:any) {
+         throw new CustomError(error.statusCode, error.message)
+      }
+   }
+
+   public getUserById = async (id: string, token: string): Promise<User> => {
+      try {
+        const tokenData = this.tokenGenerator.verify(token)
+  
+        if (!id || !token) {
+          throw new MissingParameters()
+        };
+  
+        if (!tokenData) {
+          throw new Unauthorized()
         }
+  
+        const user = await this.userDatabase.getUserById(id)
+  
+        if (!user) {
+          throw new UserNotFound()
+        }
+  
+        return user;
+      } catch (error: any) {
+        throw new CustomError(error.statusCode, error.message);
+      };
+    }; 
+    
+    async getUserByEmail(email: string, token: string) {
+        try {
+            if (!email || !token) {
+                throw new MissingParameters()
+            };
 
-        return accessToken;
+            const tokenData = this.tokenGenerator.verify(token)
+
+            if (!tokenData) {
+                throw new Unauthorized()
+            }
+
+            const user = await this.userDatabase.getUserByEmail(email);
+
+            if (!user) {
+                throw new UserNotFound()
+            }
+
+            return user;
+        }   catch (error: any) {
+            throw new CustomError(error.statusCode, error.message);
+        };
     }
 }
