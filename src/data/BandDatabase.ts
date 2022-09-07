@@ -44,4 +44,15 @@ export class BandDatabase extends BaseDataBase implements BandRepository {
          throw new Error(error.sqlMessage || error.message)
       }
    }
+
+   public async getBandById(id: string): Promise<Band | undefined> {
+      try {
+         const result = await BaseDataBase.connection.raw(`
+            SELECT * from ${this.tableName} WHERE id = '${id}'
+         `);
+         return this.toModel(result[0][0]);
+      } catch (error:any) {
+         throw new Error(error.sqlMessage || error.message)
+      }
+   }
 }

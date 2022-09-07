@@ -28,5 +28,9 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFmNTgwNjAwLTlmOWQt
 }
 
 ###
-GET http://localhost:3003/band/Nirvana 
+GET http://localhost:3003/band?name=Nirvana 
+Content-Type: application/json
+
+###
+GET http://localhost:3003/band?id=af487386-3f47-45cb-85a1-c5452704b385 
 Content-Type: application/json

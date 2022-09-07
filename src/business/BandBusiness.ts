@@ -67,4 +67,24 @@ export class BandBusiness {
             throw new CustomError(error.statusCode, error.message);
         };
     }
+
+    public async getBandById(id: string) {
+        try {
+
+            if (!id) {
+                throw new MissingParameters();
+            };
+
+            const band = await this.bandDatabase.getBandById(id)
+
+            if (!band) {
+                throw new BandNotFound()
+            }
+
+            return band;
+
+        } catch (error: any) {
+            throw new CustomError(error.statusCode, error.message);
+        };
+    }
 }
