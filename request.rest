@@ -26,3 +26,7 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFmNTgwNjAwLTlmOWQt
 	"musicGenre": "Punk rock",
 	"responsible": "Kurt Kobain"
 }
+
+###
+GET http://localhost:3003/band/Nirvana 
+Content-Type: application/json

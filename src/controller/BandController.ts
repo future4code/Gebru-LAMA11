@@ -29,4 +29,17 @@ export class BandController {
          res.status(statusCode || 400).send({ message });
       }
    }
+
+   public async getBandByName(req: Request, res: Response) {
+      try {
+        const { name } = req.params
+
+        const band = await this.bandBusiness.getBandByName(name);
+
+        res.status(200).send(band)
+      } catch (error: any) {
+        const { statusCode, message } = error
+        res.status(statusCode || 400).send({ message });
+      }
+   }
 }

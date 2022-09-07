@@ -1,19 +1,20 @@
-import { 
-    AdminUnauthorized, 
-    CustomError, 
-    MissingParameters, 
-    Unauthorized 
+import {
+    AdminUnauthorized,
+    BandNotFound,
+    CustomError,
+    MissingParameters,
+    Unauthorized
 } from "../error/CustomError";
 import { Band, BandInputDTO } from "../model/Band";
 import { BandRepository } from "./BandRepository";
 import { IIDGenerator, ITokenGenerator } from "./Ports";
 
 export class BandBusiness {
-    constructor( 
+    constructor(
         private bandDatabase: BandRepository,
         private idGenerator: IIDGenerator,
-        private tokenGenerator: ITokenGenerator 
-    ){}
+        private tokenGenerator: ITokenGenerator
+    ) { }
 
     public async createBand(input: BandInputDTO, token: string) {
         try {
@@ -24,7 +25,7 @@ export class BandBusiness {
             if (!token) {
                 throw new MissingParameters()
             };
-        
+
             if (!tokenData) {
                 throw new Unauthorized()
             }
@@ -33,17 +34,37 @@ export class BandBusiness {
                 throw new AdminUnauthorized()
             }
 
-            if(!name || !musicGenre || !responsible){
+            if (!name || !musicGenre || !responsible) {
                 throw new MissingParameters()
             }
-    
+
             const id = this.idGenerator.generate();
-    
+
             await this.bandDatabase.createBand(
                 new Band(id, name, musicGenre, responsible)
             )
-        } catch (error:any) {
+        } catch (error: any) {
             throw new CustomError(error.statusCode, error.message)
         }
+    }
+
+    public async getBandByName(name: string) {
+        try {
+
+            if (!name) {
+                throw new MissingParameters();
+            };
+
+            const band = await this.bandDatabase.getBandByName(name)
+
+            if (!band) {
+                throw new BandNotFound()
+            }
+
+            return band;
+            
+        } catch (error: any) {
+            throw new CustomError(error.statusCode, error.message);
+        };
     }
 }

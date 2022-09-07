@@ -14,4 +14,6 @@ const bandDatabase = new BandDatabase()
 const bandBusiness = new BandBusiness(bandDatabase, idGenerator, tokenGenerator)
 const bandController = new BandController(bandBusiness)
 
+bandRouter.get("/:name", (req, res) => bandController.getBandByName(req, res))
+
 bandRouter.post("/create", (req, res) => bandController.createBand(req, res))
