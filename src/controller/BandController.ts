@@ -29,4 +29,30 @@ export class BandController {
          res.status(statusCode || 400).send({ message });
       }
    }
+
+   public async getBandByName(req: Request, res: Response) {
+      try {
+        const name = req.query.name as string
+
+        const band = await this.bandBusiness.getBandByName(name);
+
+        res.status(200).send(band)
+      } catch (error: any) {
+        const { statusCode, message } = error
+        res.status(statusCode || 400).send({ message });
+      }
+   }
+
+   public async getBandById(req: Request, res: Response) {
+      try {
+        const id = req.query.id as string
+
+        const band = await this.bandBusiness.getBandById(id);
+
+        res.status(200).send(band)
+      } catch (error: any) {
+        const { statusCode, message } = error
+        res.status(statusCode || 400).send({ message });
+      }
+   }
 }
