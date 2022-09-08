@@ -11,7 +11,7 @@ class Migrations extends BaseDatabase {
          id VARCHAR(255) PRIMARY KEY,
          name VARCHAR(255) UNIQUE NOT NULL,
          music_genre VARCHAR(255) NOT NULL,
-        responsible VARCHAR(255) UNIQUE NOT NULL 
+         responsible VARCHAR(255) UNIQUE NOT NULL 
       );
 
       CREATE TABLE IF NOT EXISTS shows_lama (
@@ -30,6 +30,16 @@ class Migrations extends BaseDatabase {
          password VARCHAR(255) NOT NULL,
          role VARCHAR(255) NOT NULL DEFAULT "NORMAL"
       );
+
+      CREATE TABLE IF NOT EXISTS tickets_lama (
+         id VARCHAR(255) PRIMARY KEY,
+         name VARCHAR(255) UNIQUE NOT NULL,
+         value INT NOT NULL,
+         id_event VARCHAR(255) NOT NULL,
+         amount INT NOT NULL,
+         sold_amount INT NOT NULL,
+         FOREIGN KEY(id_event) REFERENCES shows_lama(id)
+      )
 `)
    .then(() => { console.log("Tabelas criadas") })
    .catch(printError)
