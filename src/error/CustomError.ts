@@ -8,7 +8,7 @@ export class MissingParameters extends CustomError {
   constructor() {
       super(422, "Parâmetros faltando, verifique a documentação.");
   }
-} 
+}
 
 export class NotFound extends CustomError {
   constructor() {
