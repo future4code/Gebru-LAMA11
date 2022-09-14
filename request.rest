@@ -1,0 +1,36 @@
+POST http://localhost:3003/user/signup 
+Content-Type: application/json 
+
+{
+	"name": "Alice",
+	"email": "alice@lbn.com",
+	"password": "123456"
+}
+
+###
+POST http://localhost:3003/user/login 
+Content-Type: application/json 
+
+{
+	"email": "alice@lbn.com",
+	"password": "123456"
+}
+
+###
+POST http://localhost:3003/band/create 
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFmNTgwNjAwLTlmOWQtNGIyNC05NDRiLTQyMWIyMDhiZjc0OSIsInJvbGUiOiJOT1JNQUwiLCJpYXQiOjE2NjI1NzI0ODIsImV4cCI6MTY2MzE3NzI4Mn0.Y8u-QntJK100lye5UqI5k7uzbbDvalT--1YC3nb3TB4 
+
+{
+	"name": "Nirvana",
+	"musicGenre": "Punk rock",
+	"responsible": "Kurt Kobain"
+}
+
+###
+GET http://localhost:3003/band?name=Nirvana 
+Content-Type: application/json
+
+###
+GET http://localhost:3003/band?id=af487386-3f47-45cb-85a1-c5452704b385 
+Content-Type: application/json
